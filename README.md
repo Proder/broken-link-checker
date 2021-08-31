@@ -1,2 +1,21 @@
-# -broken-link-checker
-Search for broken links
+# Broken link checker
+
+## Task description
+
+    Иногда такое бывает, что сайты имеют поломанные (невалидные) ссылки.
+    Нужно разработать приложение (бек и простой фронт), которое умеет  бегать по сайту и выдавать  поломанные ссылки.
+    Ссылка является битой, когда http status находится в диапазоне 4xx .  Приложение будет одностраничным - список битых ссылок, а также форма (интерфейс для ввода) url сайта и глубины поиска ссылок (максимум переходов по ссылкам вглубь сайта).
+    Особое внимание уделить производительности. Т.к ссылок может быть много и нужно решить задачу эффективно.
+    
+    Сайт, на котором можно тренироваться искать битые ссылки: http://target.true-tech.php.nixdev.co/
+
+**In fact**:
+
+Develop a system for finding broken links. The link is broken when the http status is 4xx.
+    
+Input: link string, depth int. 
+    
+Output: broken-links []string
+
+Ссылка для теста: 
+http://target.true-tech.php.nixdev.co/
