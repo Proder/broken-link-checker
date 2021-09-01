@@ -1,6 +1,7 @@
 package config
 
 import (
+	"broken-link-checker/app/delivery/http_test"
 	"io"
 	"log"
 	"os"
@@ -10,7 +11,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct{}
+type Config struct {
+	ServerTest http_test.Config
+}
 
 var (
 	config Config
