@@ -9,70 +9,54 @@ import (
 	"golang.org/x/net/html"
 )
 
-var (
+type Checker struct {
 	breakLinks   []string
-	checkedLinks = make(map[string]bool)
+	checkedLinks map[string]bool
 	domain       string
 	mx           sync.Mutex
-	rwMx         sync.Mutex
-)
+}
 
-func Run(link string, maxDepth int) error {
-	l := fixProtocolPrefix(link)
+func (c *Checker) Run(link string, maxDepth int) error {
+	correctLink := fixProtocolPrefix(link)
 
-	s := strings.Split(l, "/")
-	domain = s[0] + "//" + s[2]
+	c.domain = getDomain(correctLink)
+	c.checkedLinks = make(map[string]bool)
 
-	checkLinks([]string{l}, 1, &maxDepth)
+	c.checkLinks([]string{correctLink}, 1, &maxDepth)
 
-	fmt.Printf("Broken links found: %d\n", len(breakLinks))
+	fmt.Printf("Broken links found: %d\n", len(c.breakLinks))
 
 	return nil
 }
 
-func fixProtocolPrefix(link string) string {
-	if !strings.Contains(link, "://") {
-		link = "http://" + link
-	}
-	return link
+func (c *Checker) addBreakLink(link *[]string) {
+	c.mx.Lock()
+	defer c.mx.Unlock()
+
+	c.breakLinks = append(c.breakLinks, *link...)
 }
 
-func fixDomainPrefix(link *string) *string {
-	if !strings.Contains(*link, "://") {
-		*link = domain + *link
-	}
+func (c *Checker) isCheckedLinks(link *string) bool {
+	c.mx.Lock()
+	defer c.mx.Unlock()
 
-	return link
-}
-
-func addBreakLink(link *[]string) {
-	mx.Lock()
-	defer mx.Unlock()
-
-	breakLinks = append(breakLinks, *link...)
-}
-
-func isCheckedLinks(link string) bool {
-	rwMx.Lock()
-	defer rwMx.Unlock()
-
-	if !checkedLinks[link] {
-		checkedLinks[link] = true
+	if !c.checkedLinks[*link] {
+		c.checkedLinks[*link] = true
 		return false
 	} else {
 		return true
 	}
 }
 
-func checkLinks(links []string, depth int, maxDepth *int) {
+func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 	var wg sync.WaitGroup
 	strCh := make(chan string, len(links))
 
 	for _, link := range links {
-		fixDomainPrefix(&link)
+		c.fixDomainPrefix(&link)
 
 		// Has the url been checked before
-		if !isCheckedLinks(link) {
+		if !c.isCheckedLinks(&link) {
 
 			wg.Add(1)
 			go func(lnk string, ch *chan string, wg *sync.WaitGroup) {
@@ -91,7 +75,8 @@ func checkLinks(links []string, depth int, maxDepth *int) {
 					return
 				}
 
-				moreLinks := getMoreLinks(html.NewTokenizer(response.Body))
+				moreLinks := getLinks(html.NewTokenizer(response.Body))
+
 				// Close it manually. To avoid waiting for the end of the function
 				if err := response.Body.Close(); err != nil {
 					_ = fmt.Errorf("Error in the response.Body.Close(). err: %s ", err)
@@ -99,7 +84,7 @@ func checkLinks(links []string, depth int, maxDepth *int) {
 				}
 
 				if len(moreLinks) > 0 && depth < *maxDepth {
-					checkLinks(moreLinks, depth+1, maxDepth)
+					c.checkLinks(moreLinks, depth+1, maxDepth)
 				}
 			}(link, &strCh, &wg)
 		}
@@ -112,20 +97,13 @@ func checkLinks(links []string, depth int, maxDepth *int) {
 	for v := range strCh {
 		brLinks = append(brLinks, v)
 	}
-	addBreakLink(&brLinks)
+	c.addBreakLink(&brLinks)
 }
 
-func getMoreLinks(htmlTokens *html.Tokenizer) (newLink []string) {
-	for {
-		tt := htmlTokens.Next()
-		switch tt {
-		case html.ErrorToken:
-			return
-		case html.StartTagToken:
-			t := htmlTokens.Token()
-			if t.Data == "a" {
-				newLink = append(newLink, t.Attr[0].Val)
-			}
-		}
+func (c *Checker) fixDomainPrefix(link *string) *string {
+	if !strings.Contains(*link, "://") {
+		*link = c.domain + *link
 	}
+
+	return link
 }

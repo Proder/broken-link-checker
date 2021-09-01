@@ -21,7 +21,8 @@ func Run() error {
 	time.Sleep(1 * time.Second)
 
 	start := time.Now()
-	err = linkChecker.Run("http://localhost:8080/", 3)
+	checker := linkChecker.Checker{}
+	err = checker.Run("http://localhost:8080/", 3)
 	if err != nil {
 		return err
 	}
