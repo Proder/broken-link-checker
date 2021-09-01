@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"golang.org/x/net/html"
 )
@@ -12,6 +13,8 @@ var (
 	breakLinks   []string
 	checkedLinks = make(map[string]bool)
 	domain       string
+	mx           sync.Mutex
+	rwMx         sync.Mutex
 )
 
 func Run(link string, maxDepth int) error {
@@ -23,7 +26,7 @@ func Run(link string, maxDepth int) error {
 	checkLinks([]string{l}, 1, &maxDepth)
 
 	fmt.Printf("Broken links found: %d\n", len(breakLinks))
-	fmt.Println(breakLinks)
+
 	return nil
 }
 
@@ -42,38 +45,74 @@ func fixDomainPrefix(link *string) *string {
 	return link
 }
 
+func addBreakLink(link *[]string) {
+	mx.Lock()
+	defer mx.Unlock()
+
+	breakLinks = append(breakLinks, *link...)
+}
+
+func isCheckedLinks(link string) bool {
+	rwMx.Lock()
+	defer rwMx.Unlock()
+
+	if !checkedLinks[link] {
+		checkedLinks[link] = true
+		return false
+	} else {
+		return true
+	}
+}
+
 func checkLinks(links []string, depth int, maxDepth *int) {
+	var wg sync.WaitGroup
+	strCh := make(chan string, len(links))
+
 	for _, link := range links {
 		fixDomainPrefix(&link)
+
 		// Has the url been checked before
-		if !checkedLinks[link] {
-			checkedLinks[link] = true
+		if !isCheckedLinks(link) {
 
-			// Send a request / receive a response.
-			response, err := http.Get(link)
-			if err != nil {
-				fmt.Println("http.Get err: " + err.Error())
+			wg.Add(1)
+			go func(lnk string, ch *chan string, wg *sync.WaitGroup) {
+				defer wg.Done()
 
-				continue
-			}
+				// Send a request / receive a response.
+				response, err := http.Get(lnk)
+				if err != nil {
+					fmt.Println("http.Get err: " + err.Error())
 
-			if response.StatusCode >= 400 && response.StatusCode < 500 {
-				breakLinks = append(breakLinks, link)
-			}
+					return
+				}
 
-			moreLinks := getMoreLinks(html.NewTokenizer(response.Body))
-			// Close it manually. To avoid waiting for the end of the function
-			if err := response.Body.Close(); err != nil {
-				_ = fmt.Errorf("Error in the response.Body.Close(). err: %s ", err)
-				continue
-			}
+				if response.StatusCode >= 400 && response.StatusCode < 500 {
+					*ch <- lnk
+					return
+				}
 
-			if len(moreLinks) > 0 && depth < *maxDepth {
-				depth++
-				checkLinks(moreLinks, depth, maxDepth)
-			}
+				moreLinks := getMoreLinks(html.NewTokenizer(response.Body))
+				// Close it manually. To avoid waiting for the end of the function
+				if err := response.Body.Close(); err != nil {
+					_ = fmt.Errorf("Error in the response.Body.Close(). err: %s ", err)
+					return
+				}
+
+				if len(moreLinks) > 0 && depth < *maxDepth {
+					checkLinks(moreLinks, depth+1, maxDepth)
+				}
+			}(link, &strCh, &wg)
 		}
 	}
+
+	wg.Wait()
+	close(strCh)
+
+	var brLinks []string
+	for v := range strCh {
+		brLinks = append(brLinks, v)
+	}
+	addBreakLink(&brLinks)
 }
 
 func getMoreLinks(htmlTokens *html.Tokenizer) (newLink []string) {

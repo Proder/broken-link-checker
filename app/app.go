@@ -4,6 +4,8 @@ import (
 	"broken-link-checker/app/config"
 	"broken-link-checker/app/delivery/http_test"
 	"broken-link-checker/app/service/linkChecker"
+	"fmt"
+	"time"
 )
 
 func Run() error {
@@ -16,9 +18,15 @@ func Run() error {
 		return err
 	}
 
+	time.Sleep(1 * time.Second)
+
+	start := time.Now()
 	err = linkChecker.Run("http://localhost:8080/", 3)
 	if err != nil {
 		return err
 	}
+	duration := time.Since(start)
+	fmt.Println("Time spent: ", duration)
+
 	return nil
 }
