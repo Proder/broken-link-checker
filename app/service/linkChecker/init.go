@@ -2,9 +2,11 @@ package linkChecker
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/net/html"
 )
@@ -14,17 +16,21 @@ type Checker struct {
 	checkedLinks map[string]bool
 	domain       string
 	mx           sync.Mutex
+	duration     time.Duration
 }
 
 func (c *Checker) Run(link string, maxDepth int) error {
+	start := time.Now()
+
 	correctLink := fixProtocolPrefix(link)
 
 	c.domain = getDomain(correctLink)
 	c.checkedLinks = make(map[string]bool)
+	c.breakLinks = []string{}
 
 	c.checkLinks([]string{correctLink}, 1, &maxDepth)
 
-	fmt.Printf("Broken links found: %d\n", len(c.breakLinks))
+	c.duration = time.Since(start)
 
 	return nil
 }
@@ -79,7 +85,7 @@ func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 
 				// Close it manually. To avoid waiting for the end of the function
 				if err := response.Body.Close(); err != nil {
-					_ = fmt.Errorf("Error in the response.Body.Close(). err: %s ", err)
+					log.Println("Error in the response.Body.Close(). err: ", err.Error())
 					return
 				}
 
@@ -106,4 +112,12 @@ func (c *Checker) fixDomainPrefix(link *string) *string {
 	}
 
 	return link
+}
+
+func (c *Checker) GetBreakLinks() []string {
+	return c.breakLinks
+}
+
+func (c *Checker) GetDuration() string {
+	return c.duration.String()
 }

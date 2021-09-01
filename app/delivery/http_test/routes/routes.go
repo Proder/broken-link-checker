@@ -4,17 +4,16 @@ import (
 	"broken-link-checker/app/delivery/http_test/response"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 )
 
 func InitRoutes() *gin.Engine {
-	gin.SetMode(viper.GetString("server.mode"))
-
 	r := gin.New()
 	r.Use(
 		// gin.Logger(),
 		gin.Recovery(),
 	)
+
+	r.GET("/", response.Success)
 
 	successGroup := r.Group("/success")
 	{
@@ -38,7 +37,7 @@ func InitRoutes() *gin.Engine {
 	}
 
 	r.NoRoute(func(c *gin.Context) {
-		response.Success(c)
+		response.ErrorUrl(c)
 	})
 
 	return r

@@ -40,7 +40,7 @@ func Redirect(c *gin.Context) {
 }
 
 func ErrorUrl(c *gin.Context) {
-	c.JSON(400, nil)
+	c.JSON(404, nil)
 }
 
 func ErrorServer(c *gin.Context) {
