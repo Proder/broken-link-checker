@@ -6,6 +6,4 @@ WORKDIR /go/src/app
 
 RUN go build -o checker cmd/checker/main.go
 
-EXPOSE 8080
-
 CMD ["./checker"]
