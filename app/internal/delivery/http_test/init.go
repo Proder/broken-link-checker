@@ -1,7 +1,7 @@
 package http_test
 
 import (
-	"broken-link-checker/app/delivery/http_test/routes"
+	routes2 "broken-link-checker/app/internal/delivery/http_test/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +16,7 @@ func StartServer(cnf *Config) error {
 	gin.SetMode(cnf.Mode)
 
 	// Declaring routes
-	rts := routes.InitRoutes()
+	rts := routes2.InitRoutes()
 
 	// Starting the server
 	if err := rts.Run(cnf.Host + ":" + cnf.Port); err != nil {

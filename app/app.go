@@ -2,8 +2,8 @@ package app
 
 import (
 	"broken-link-checker/app/config"
-	"broken-link-checker/app/delivery/http"
-	"broken-link-checker/app/delivery/http_test"
+	http2 "broken-link-checker/app/internal/delivery/http"
+	http_test2 "broken-link-checker/app/internal/delivery/http_test"
 )
 
 func Run() error {
@@ -11,7 +11,7 @@ func Run() error {
 	cnf := config.Get()
 
 	// Start the server
-	err := http.StartServer(&cnf.Server)
+	err := http2.StartServer(&cnf.Server)
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func RunServerTest() error {
 	cnf := config.Get()
 
 	// Start the server for testing
-	err := http_test.StartServer(&cnf.ServerTest)
+	err := http_test2.StartServer(&cnf.ServerTest)
 	if err != nil {
 		return err
 	}

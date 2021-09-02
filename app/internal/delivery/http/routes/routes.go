@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"broken-link-checker/app/delivery/http/api/v1/checker"
+	checker2 "broken-link-checker/app/internal/delivery/http/api/v1/checker"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ func InitRoutes() *gin.Engine {
 	{
 		v1 := apiGroup.Group("/v1")
 		{
-			v1.POST("search-broken-links", checker.SearchBrokenLinks)
+			v1.POST("search-broken-links", checker2.SearchBrokenLinks)
 		}
 	}
 
