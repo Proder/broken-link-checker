@@ -1,0 +1,11 @@
+FROM golang:1.16
+
+COPY . /go/src/app
+
+WORKDIR /go/src/app
+
+RUN go build -o server_test cmd/server_test/main.go
+
+EXPOSE 8081
+
+CMD ["./server_test"]
