@@ -89,7 +89,7 @@ func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 					return
 				}
 
-				if len(moreLinks) > 0 && depth < *maxDepth {
+				if len(moreLinks) > 0 && depth <= *maxDepth {
 					c.checkLinks(moreLinks, depth+1, maxDepth)
 				}
 			}(link, &strCh, &wg)
