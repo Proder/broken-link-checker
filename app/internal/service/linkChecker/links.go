@@ -6,12 +6,12 @@ import (
 	"golang.org/x/net/html"
 )
 
-func getDomain(link string) string {
+func getLinkDomain(link string) string {
 	s := strings.Split(link, "/")
 	return s[0] + "//" + s[2]
 }
 
-func fixProtocolPrefix(link string) string {
+func fixMissingLinkProtocol(link string) string {
 	if !strings.Contains(link, "://") {
 		link = "http://" + link
 	}

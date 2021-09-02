@@ -35,10 +35,6 @@ func Success(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 }
 
-func Redirect(c *gin.Context) {
-	c.JSON(301, nil)
-}
-
 func ErrorUrl(c *gin.Context) {
 	c.JSON(404, nil)
 }
@@ -55,7 +51,7 @@ func getRandomLink(href string, count int) string {
 
 	buffer := bytes.Buffer{}
 	for i := 0; i < count; i++ {
-		randStr := strconv.FormatInt(int64(i+100), 10) // strconv.FormatInt(int64(rand.Intn(10000)+10), 10)
+		randStr := strconv.FormatInt(int64(i+100), 10)
 		buffer.WriteString(prefix)
 		buffer.WriteString(href)
 		buffer.WriteString(randStr)

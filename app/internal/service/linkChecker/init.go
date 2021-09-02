@@ -22,9 +22,9 @@ type Checker struct {
 func (c *Checker) Run(link string, maxDepth int) error {
 	start := time.Now()
 
-	correctLink := fixProtocolPrefix(link)
+	correctLink := fixMissingLinkProtocol(link)
 
-	c.domain = getDomain(correctLink)
+	c.domain = getLinkDomain(correctLink)
 	c.checkedLinks = make(map[string]bool)
 	c.breakLinks = []string{}
 
