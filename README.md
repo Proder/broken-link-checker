@@ -33,6 +33,6 @@ The test server will be available at:
  - "http://server_test:8081" - for the container;
  - "http://localhost:8081" - for the user;
 
-## how it looks like
+## How it looks like
 
 <img src="./images/make-run.png">
