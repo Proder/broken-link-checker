@@ -21,7 +21,7 @@ The provided link for the test:
 http://target.true-tech.php.nixdev.co/
 
 
-##How use
+## How use
 
     make run - run project in docker container. 
     make run_checker - run 'broken-link-checker' in IDE. (race mode)
@@ -33,6 +33,6 @@ The test server will be available at:
  - "http://server_test:8081" - for the container;
  - "http://localhost:8081" - for the user;
 
-##how it looks like
+## how it looks like
 
 <img src="./images/make-run.png">
