@@ -1,9 +1,9 @@
 server:
   host: "localhost"
   port: "8080"
-  mode: "release"
+  mode: "debug"
 
 serverTest:
   host: "localhost"
   port: "8081"
-  mode: "release"
+  mode: "debug"

@@ -11,11 +11,14 @@ func getLinkDomain(link string) string {
 	return s[0] + "//" + s[2]
 }
 
-func fixMissingLinkProtocol(link string) string {
-	if !strings.Contains(link, "://") {
-		link = "http://" + link
+func fixMissingLinkProtocol(link *string) {
+	if link == nil {
+		return
 	}
-	return link
+
+	if !strings.Contains(*link, "://") {
+		*link = "http://" + *link
+	}
 }
 
 func getLinks(htmlTokens *html.Tokenizer) (newLink []string) {

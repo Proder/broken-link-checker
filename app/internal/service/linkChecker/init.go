@@ -11,7 +11,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-type Checker struct {
+type checker struct {
+	fixedLink    string
 	breakLinks   []string
 	checkedLinks map[string]bool
 	domain       string
@@ -19,42 +20,47 @@ type Checker struct {
 	duration     time.Duration
 }
 
-func (c *Checker) Run(link string, maxDepth int) error {
+func New(link string) *checker {
+	fixMissingLinkProtocol(&link)
+
+	return &checker{
+		fixedLink:    link,
+		domain:       getLinkDomain(link),
+		checkedLinks: map[string]bool{},
+		breakLinks:   []string{},
+	}
+}
+
+func (c *checker) Run(maxDepth int) error {
 	start := time.Now()
 
-	correctLink := fixMissingLinkProtocol(link)
-
-	c.domain = getLinkDomain(correctLink)
-	c.checkedLinks = make(map[string]bool)
-	c.breakLinks = []string{}
-
-	c.checkLinks([]string{correctLink}, 1, &maxDepth)
+	c.checkLinks([]string{c.fixedLink}, 1, &maxDepth)
 
 	c.duration = time.Since(start)
 
 	return nil
 }
 
-func (c *Checker) addBreakLink(link *[]string) {
+func (c *checker) addBreakLink(link *[]string) {
 	c.mx.Lock()
 	defer c.mx.Unlock()
 
 	c.breakLinks = append(c.breakLinks, *link...)
 }
 
-func (c *Checker) isCheckedLinks(link *string) bool {
+func (c *checker) isCheckedLinks(link string) bool {
 	c.mx.Lock()
 	defer c.mx.Unlock()
 
-	if !c.checkedLinks[*link] {
-		c.checkedLinks[*link] = true
-		return false
-	} else {
+	if c.checkedLinks[link] {
 		return true
 	}
+
+	c.checkedLinks[link] = true
+	return false
 }
 
-func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
+func (c *checker) checkLinks(links []string, depth int, maxDepth *int) {
 	var wg sync.WaitGroup
 	strCh := make(chan string, len(links))
 
@@ -62,17 +68,19 @@ func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 		c.fixDomainPrefix(&link)
 
 		// Has the url been checked before
-		if !c.isCheckedLinks(&link) {
+		if !c.isCheckedLinks(link) {
 
 			wg.Add(1)
-			go func(lnk string, ch *chan string, wg *sync.WaitGroup) {
+			go func(lnk string, ch *chan string) {
 				defer wg.Done()
 
 				// Send a request / receive a response.
-				response, err := http.Get(lnk)
+				client := http.Client{
+					Timeout: 5 * time.Second,
+				}
+				response, err := client.Get(lnk)
 				if err != nil {
-					fmt.Println("http.Get err: " + err.Error())
-
+					fmt.Println("client.Get err: " + err.Error())
 					return
 				}
 
@@ -92,12 +100,14 @@ func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 				if len(moreLinks) > 0 && depth <= *maxDepth {
 					c.checkLinks(moreLinks, depth+1, maxDepth)
 				}
-			}(link, &strCh, &wg)
+			}(link, &strCh)
 		}
 	}
 
-	wg.Wait()
-	close(strCh)
+	go func() {
+		wg.Wait()
+		close(strCh)
+	}()
 
 	var brLinks []string
 	for v := range strCh {
@@ -106,18 +116,20 @@ func (c *Checker) checkLinks(links []string, depth int, maxDepth *int) {
 	c.addBreakLink(&brLinks)
 }
 
-func (c *Checker) fixDomainPrefix(link *string) *string {
+func (c *checker) fixDomainPrefix(link *string) {
+	if link == nil {
+		return
+	}
+
 	if !strings.Contains(*link, "://") {
 		*link = c.domain + *link
 	}
-
-	return link
 }
 
-func (c *Checker) GetBreakLinks() []string {
+func (c *checker) GetBreakLinks() []string {
 	return c.breakLinks
 }
 
-func (c *Checker) GetDuration() string {
+func (c *checker) GetDuration() string {
 	return c.duration.String()
 }

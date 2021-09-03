@@ -2,6 +2,7 @@ package http_test
 
 import (
 	"broken-link-checker/app/internal/delivery/http_test/routes"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +21,7 @@ func StartServer(cnf *Config) error {
 
 	// Starting the server
 	if err := rts.Run(cnf.Host + ":" + cnf.Port); err != nil {
-		return err
+		return fmt.Errorf("rts.Run failed: %w", err)
 	}
 
 	return nil

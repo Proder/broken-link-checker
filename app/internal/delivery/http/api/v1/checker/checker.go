@@ -24,14 +24,14 @@ func SearchBrokenLinks(c *gin.Context) {
 		return
 	}
 
-	checker := linkChecker.Checker{}
-	if err := checker.Run(data.Link, data.Depth); err != nil {
+	checker := linkChecker.New(data.Link)
+	if err := checker.Run(data.Depth); err != nil {
 		log.Println("checker -> SearchBrokenLinks: linkChecker error. reason: ", err.Error())
 		response.Error(c, "Server error: "+err.Error())
 		return
 	}
 
-	fmt.Printf("Broken links found: %d\n", len(checker.GetBreakLinks()))
+	log.Println("Broken links found: ", len(checker.GetBreakLinks()))
 	fmt.Printf("Time spent: %s\n", checker.GetDuration())
 
 	response.Success(c, responseData{
