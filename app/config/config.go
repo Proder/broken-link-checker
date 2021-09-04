@@ -1,8 +1,8 @@
 package config
 
 import (
-	http2 "broken-link-checker/app/internal/delivery/http"
-	http_test2 "broken-link-checker/app/internal/delivery/http_test"
+	"broken-link-checker/app/internal/delivery/http"
+	"broken-link-checker/app/internal/delivery/http_test"
 	"log"
 	"os"
 	"strings"
@@ -12,8 +12,8 @@ import (
 )
 
 type Config struct {
-	Server     http2.Config
-	ServerTest http_test2.Config
+	Server     http.Config
+	ServerTest http_test.Config
 }
 
 var (

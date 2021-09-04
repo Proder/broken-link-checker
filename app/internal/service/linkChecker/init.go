@@ -1,7 +1,6 @@
 package linkChecker
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -80,7 +79,7 @@ func (c *checker) checkLinks(links []string, depth int, maxDepth *int) {
 				}
 				response, err := client.Get(lnk)
 				if err != nil {
-					fmt.Println("client.Get err: " + err.Error())
+					log.Println("client.Get err: ", err.Error())
 					return
 				}
 
