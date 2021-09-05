@@ -8,7 +8,10 @@ import (
 
 func main() {
 	// Get the server settings
-	cnf := config.Get()
+	cnf, err := config.Get()
+	if err != nil {
+		log.Fatal("config.Get failed: ", err)
+	}
 
 	// Start the server
 	if err := http.StartServer(&cnf.Server); err != nil {

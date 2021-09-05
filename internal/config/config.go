@@ -3,10 +3,9 @@ package config
 import (
 	"broken-link-checker/internal/delivery/http"
 	"broken-link-checker/internal/delivery/http_test"
-	"log"
+	"fmt"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -16,39 +15,30 @@ type Config struct {
 	ServerTest http_test.Config
 }
 
-var (
-	config Config
-	once   sync.Once
-)
-
 // Get reads config from environment and config.yml. Once.
-func Get() *Config {
-	once.Do(func() {
-		configPath := "./configs"
+func Get() (Config, error) {
+	cnf := Config{}
+	configPath := "./configs"
 
-		if _, err := os.Stat(configPath + "/config.yml"); err != nil {
-			log.Fatal(err)
-			return
-		}
+	if _, err := os.Stat(configPath + "/config.yml"); err != nil {
+		return cnf, fmt.Errorf("os.Stat failed: %w", err)
+	}
 
-		viper.AddConfigPath(configPath)
-		viper.SetConfigName("config")
+	viper.AddConfigPath(configPath)
+	viper.SetConfigName("config")
 
-		viper.AllowEmptyEnv(true)
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		viper.AutomaticEnv()
+	viper.AllowEmptyEnv(true)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 
-		// Read config.yml
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatal(err)
-			return
-		}
+	// Read config.yml
+	if err := viper.ReadInConfig(); err != nil {
+		return cnf, fmt.Errorf("viper.ReadInConfig failed: %w", err)
+	}
 
-		if err := viper.Unmarshal(&config); err != nil {
-			log.Fatal(err)
-			return
-		}
-	})
+	if err := viper.Unmarshal(&cnf); err != nil {
+		return cnf, fmt.Errorf("viper.Unmarshal failed: %w", err)
+	}
 
-	return &config
+	return cnf, nil
 }
