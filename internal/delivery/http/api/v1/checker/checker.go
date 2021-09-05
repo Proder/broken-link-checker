@@ -1,9 +1,9 @@
 package checker
 
 import (
-	"broken-link-checker/app/internal/delivery/http/api/v1/response"
-	"broken-link-checker/app/internal/models"
-	"broken-link-checker/app/internal/service/linkChecker"
+	"broken-link-checker/internal/delivery/http/api/v1/response"
+	"broken-link-checker/internal/models"
+	"broken-link-checker/internal/service/linkChecker"
 	"fmt"
 	"log"
 

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"broken-link-checker/app/internal/delivery/http/api/v1/checker"
+	"broken-link-checker/internal/delivery/http/api/v1/checker"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"

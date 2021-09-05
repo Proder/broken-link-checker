@@ -1,7 +1,7 @@
-package http
+package http_test
 
 import (
-	"broken-link-checker/app/internal/delivery/http/routes"
+	"broken-link-checker/internal/delivery/http_test/routes"
 	"fmt"
 
 	"github.com/gin-gonic/gin"

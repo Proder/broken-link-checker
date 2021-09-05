@@ -1,8 +1,8 @@
 package config
 
 import (
-	"broken-link-checker/app/internal/delivery/http"
-	"broken-link-checker/app/internal/delivery/http_test"
+	"broken-link-checker/internal/delivery/http"
+	"broken-link-checker/internal/delivery/http_test"
 	"log"
 	"os"
 	"strings"
