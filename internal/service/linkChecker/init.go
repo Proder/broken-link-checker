@@ -75,7 +75,7 @@ func (c *checker) checkLinks(links []string, depth int, maxDepth *int) {
 
 				// Send a request / receive a response.
 				client := http.Client{
-					Timeout: 5 * time.Second,
+					Timeout: 60 * time.Second,
 				}
 				response, err := client.Get(lnk)
 				if err != nil {
