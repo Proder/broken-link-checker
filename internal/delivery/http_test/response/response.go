@@ -36,11 +36,11 @@ func Success(c *gin.Context) {
 }
 
 func ErrorUrl(c *gin.Context) {
-	c.JSON(404, nil)
+	c.JSON(http.StatusNotFound, nil)
 }
 
 func ErrorServer(c *gin.Context) {
-	c.JSON(500, nil)
+	c.JSON(http.StatusInternalServerError, nil)
 }
 
 func getRandomLink(href string, count int) string {
