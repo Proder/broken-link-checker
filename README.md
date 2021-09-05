@@ -20,6 +20,10 @@ Output: broken-links []string
 The provided link for the test: 
 http://target.true-tech.php.nixdev.co/
 
+## Notes
+ * As an addition, I implemented a testing server
+ * To avoid unnecessarily complicating the test code, do not process the "EOF" response
+ * The front gets a full set of broken links, but shows only ten
 
 ## How use
 
