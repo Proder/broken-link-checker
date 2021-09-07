@@ -41,4 +41,4 @@ The test server will be available at:
 <img src="./images/make-run.png">
 
 
-<img src="./images/make-run_2.png">
+<img src="./images/make_run_2.png">
