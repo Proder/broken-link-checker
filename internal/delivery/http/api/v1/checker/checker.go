@@ -24,6 +24,8 @@ func SearchBrokenLinks(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("Run found: ", data.Link)
+
 	checker := linkChecker.New(data.Link)
 	if err := checker.Run(data.Depth); err != nil {
 		log.Println("checker -> SearchBrokenLinks: linkChecker error. reason: ", err.Error())
