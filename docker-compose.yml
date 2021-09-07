@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile.server_test
     container_name: server_test
     ports:
-      - ":8081:8081"
+      - "8081:8081"
     environment:
       SERVERTEST_HOST: ""
       SERVERTEST_PORT: "8081"

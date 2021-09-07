@@ -8,18 +8,17 @@
         let waitResponse = false;
         let data = {
             link: "",
-            depth: 3
+            depth: 2
         }
 
         function send() {
             if (readyToSend && !waitResponse) {
                 waitResponse = true;
-                const infoBlock = document.getElementById("infoBlock")
+                const infoBlock = document.getElementById("infoBlock");
                 infoBlock.style.visibility = "hidden";
-                /*const data = {
-                link: document.getElementById("link").value,
-                depth: Number(document.getElementById("depth").value),
-            }*/
+                const waitMsg = document.getElementById("wait-msg");
+                waitMsg.style.visibility = "visible";
+                document.getElementById("breakText").innerHTML = "";
 
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", '/api/v1/search-broken-links', true)
@@ -33,8 +32,11 @@
                             const response = JSON.parse(xhr.response);
                             console.log("response: ", response)
 
+                            document.getElementById("reqStatus").innerHTML = response.status
+                            document.getElementById("errConn").innerHTML = response.data.Info.errConn
+                            document.getElementById("errServer").innerHTML = response.data.Info.errServer
                             document.getElementById("breakCount").innerHTML = response.data.BreakLinks.length
-                            document.getElementById("duration").innerHTML = response.data.Duration
+                            document.getElementById("duration").innerHTML = response.data.Info.duration
 
                             let htmlBreak = "";
                             for (let i = 0; i < 10 && i < response.data.BreakLinks.length; i++) {
@@ -43,9 +45,13 @@
                             }
 
                             document.getElementById("breakText").innerHTML = htmlBreak
-
-                            infoBlock.style.visibility = "visible";
+                        } else {
+                            document.getElementById("reqStatus").innerHTML = "Error";
+                            document.getElementById("breakCount").innerHTML = "0";
+                            document.getElementById("duration").innerHTML = "-";
                         }
+                        waitMsg.style.visibility = "hidden";
+                        infoBlock.style.visibility = "visible";
                         waitResponse = false;
                     }
                 }
@@ -190,13 +196,19 @@
 
                 <div class="form_group">
                     <input id="depth" class="form_input" type="number" name="depth" required="required"
-                           onchange="changeDepth(this.value)" value="3">
+                           onchange="changeDepth(this.value)" value="2">
                     <label class="form_label" for="depth">Depth</label>
                 </div>
 
                 <input id="sendBtn" class="send-btn" value="Search" type="submit" onclick="send(); return false;">
             </form>
             <div id="infoBlock" class="links-info" style="visibility: hidden">
+                <div><b>Status: </b>
+                    <p id="reqStatus">-</p></div>
+                <div><b>Connections lose: </b>
+                    <p id="errConn">0</p></div>
+                <div><b>Status 500 and more: </b>
+                    <p id="errServer">0</p></div>
                 <div><b>Broken links: </b>
                     <p id="breakCount">0</p></div>
                 <div><b>The request was completed in: </b>
@@ -205,6 +217,9 @@
                     <div id="breakText" class="break-text">-</div>
                 </div>
             </div>
+        </div>
+        <div class="title m-b-md" id="wait-msg" style="visibility: hidden">
+            Waiting...
         </div>
     </div>
 </div>

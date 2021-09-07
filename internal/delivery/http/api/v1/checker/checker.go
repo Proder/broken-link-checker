@@ -13,6 +13,7 @@ import (
 type responseData struct {
 	Duration   string
 	BreakLinks []string
+	Info       linkChecker.Info
 }
 
 func SearchBrokenLinks(c *gin.Context) {
@@ -24,8 +25,10 @@ func SearchBrokenLinks(c *gin.Context) {
 		return
 	}
 
-	checker := linkChecker.New(data.Link)
-	if err := checker.Run(data.Depth); err != nil {
+	fmt.Println("Run found: ", data.Link)
+
+	checker := linkChecker.New(data.Link, data.Depth)
+	if err := checker.Run(); err != nil {
 		log.Println("checker -> SearchBrokenLinks: linkChecker error. reason: ", err.Error())
 		response.Error(c, "Server error: "+err.Error())
 		return
@@ -35,7 +38,7 @@ func SearchBrokenLinks(c *gin.Context) {
 	fmt.Printf("Time spent: %s\n", checker.GetDuration())
 
 	response.Success(c, responseData{
-		Duration:   checker.GetDuration(),
 		BreakLinks: checker.GetBreakLinks(),
+		Info:       checker.GetInfo(),
 	})
 }
